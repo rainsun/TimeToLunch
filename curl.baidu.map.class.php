@@ -2,12 +2,17 @@
 
 class curlbaidumap {
   
+  public  $pageNum = 0;
   private $uid = NULL;
   private $geo = "40.037556,116.423708";
   private $ak = "387c7138aa48098fe355d41f5b225926";
-  private $placeUrl = "http://api.map.baidu.com/place/v2/search?ak=<<--ak-->>&output=json&query=%E9%A4%90%E9%A6%86&page_size=10&page_num=0&scope=2&location=<<--geo-->>&radius=10000";        
+  private $placeUrl = "http://api.map.baidu.com/place/v2/search?ak=<<--ak-->>&output=json&query=%E9%A4%90%E9%A6%86&page_size=10&page_num=<<--page-->>&scope=2&location=<<--geo-->>&radius=10000";        
   private $tuangouUrl = "http://api.map.baidu.com/place/v2/eventdetail?uid=<<--uid-->>&output=json&ak=<<--ak-->>";
   
+  public function setGeo($location){
+    $this->geo = $location;
+  }
+
   public function getPlace() {
     $placeUrl = $this->wrapUrl($this->placeUrl);
     $res = $this->cUrl($placeUrl);
@@ -27,11 +32,13 @@ class curlbaidumap {
       "<<--uid-->>",
       "<<--ak-->>",
       "<<--geo-->>",
+      "<<-page->>"
     );
     $replace = array(
     	$this->uid,
-      	$this->ak,
-      	$this->geo,
+    	$this->ak,
+    	$this->geo,
+      $this->pageNum,
     );
   	return str_replace($search, $replace, $url);
   }

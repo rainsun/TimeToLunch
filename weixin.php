@@ -16,14 +16,25 @@ switch($type){
     include "helper.class.php";
     $helper = new helper();
     $reply = $helper->smartSwitch($wechat->getRevContent(), $wechat->getRevFrom());
-
-    $wechat->text($reply)->reply();
+    if(is_array($reply))
+      $wechat->news($reply)->reply();
+    else
+      $wechat->text($reply)->reply();
     exit;
     break;
-  case Wechat::MSGTYPE_EVENT:
-      break;
+  case Wechat::MSGTYPE_LOCATION:
+    include "helper.class.php";
+    $helper = new helper();
+    $result = $wechat->getRevGeo();
+    $result = $helper->setLocation($wechat->getRevFrom(), $result['x'], $result['y']);
+    if($result)
+      $wechat->text("成功记录您的位置，请继续")->reply();
+    else
+      $wechat->text("定位失败，请重试")->reply();
+    break;
   case Wechat::MSGTYPE_IMAGE:
-      break;
+    $wechat->text("图片功能正在开发中!!")->reply();
+    break;
   default:
-      $weObj->text("help info")->reply();
+    $weObj->text("help info")->reply();
 }
