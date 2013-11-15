@@ -68,6 +68,19 @@ class helper{
         $this->setStatus($fromUsername, 'LIST');
       	return $this->menuList($fromUsername);
       	break;
+
+      case "r":
+      case "run":
+        $res =  array(
+          0 => array(
+            'Title'=>'msg title',
+            'Description'=>'summary text',
+            'PicUrl'=>'http://tuanimg6.baidu.com/data/tuan_f013aa089b9e6270d7ed37db85376acb',
+            'Url'=>'http://www.baidu.com'
+            ),
+          );
+        return $res;
+        break;
       
       default: 
         return $this->menuDefault();
@@ -79,7 +92,7 @@ class helper{
 
 
   private function menuHelp(){
-  	$res = "go:出发去吃饭;\nlist:列出周边吃饭的地方;";
+  	$res = "go:出发去吃饭;\nlist:列出周边吃饭的地方;\n发送位置，帮助您找到周边的美食O(∩_∩)O~";
     return $res;
   }
   
@@ -102,23 +115,27 @@ class helper{
     $this->redis->setTimeout($fromUsername, 60*60*4);
 
 
-      /*$news = array(
-        'Title' => $result['name'],
-        'Description' => $result['address'],
-        'PicUrl' => "http://api.map.baidu.com/staticimage?center=".$result['location']['lng'].",".$result['location']['lat']."&width=150&height=150&zoom=13",
-        'Url' => $result['detail_info']['detail_url'],
-      );*/
+      $news = array(
+        0 => array(
+          'Title' => $result['name'],
+          'Description' => $result['address'],
+          'PicUrl' => "http://api.map.baidu.com/staticimage?center=".$result['location']['lng'].",".$result['location']['lat']."&width=150&height=150&zoom=13",
+          'Url' => $result['detail_info']['detail_url'],
+        ),
+      );
       //$news[0] = $news;
-    return $result['name']. $result['address']."<".$result['detail_info']['detail_url'].">";
-    //return $news;
+    //return $result['name']. $result['address']."<".$result['detail_info']['detail_url'].">";
+    return $news;
   }
   
   private function menuList($fromUsername){
     $poi = new curlbaidumap();
     $location = $this->getLocation($fromUsername);
     if($location){
+
       if($this->debug)
         echo "== Location:". $location. "\n";
+
       $poi->setGeo($location);
     }
     $result = $poi->getPlace();
@@ -126,7 +143,18 @@ class helper{
     $count = count($result);
     $str = "";
     for($i=0;$i<$count;$i++){
-      $str .= ($i+1).".".$result[$i]['name']."\n";	
+      $str .= ($i+1).".".$result[$i]['name'];
+
+      //团购信息
+      $tuanGou = $poi->getTuanGouInfo( $result[$i]['uid'] );
+      if ( $tuanGou ){
+        foreach ($tuanGou as $value) {     
+          $str .= "|".$value['cn_name'];
+        }
+      }	
+      $str .= "\n";
+
+
     }
     return $str;
   }
@@ -140,8 +168,10 @@ class helper{
   	$poi = new curlbaidumap();
     $location = $this->getLocation($fromUsername);
     if($location){
+
       if($this->debug)
         echo "== Location: ". $location. "\n";
+
       $poi->setGeo($location);
     }
     $res = $poi->getPlace();

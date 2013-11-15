@@ -24,7 +24,16 @@ class curlbaidumap {
     $this->uid = $uid;
     $tuangouUrl = $this->wrapUrl($this->tuangouUrl);
   	$res = $this->cUrl($tuangouUrl);
-    return json_decode($res, true);
+    $res = json_decode($res, true);
+    if ( $res['status'] != 0 ){
+      return false;
+    }else{
+      $res = $res['result'];
+    }
+    if (array_key_exists('events', $res))
+      return $res['events'];
+    else
+      return false;
   }
   
   private function wrapUrl($url) {
